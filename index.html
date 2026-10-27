@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mathe-Training</title><meta name="robots" content="noindex, nofollow"><meta name="theme-color" content="#E2702A">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Mathe">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png">
+<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#FBF7EE;font-family:-apple-system,system-ui,sans-serif;color:#26221E}
+.c{background:#fff;border:2px solid #E6DCCD;border-radius:20px;padding:28px 26px;width:min(360px,90vw);text-align:center}
+img{width:72px;height:72px;border-radius:16px}h1{font-size:24px;margin:12px 0 6px}p{color:#7A6F63;margin:0 0 16px}
+input{font-size:18px;padding:11px 14px;border:2px solid #E6DCCD;border-radius:12px;width:100%;box-sizing:border-box}input:focus{outline:none;border-color:#E2702A}
+button{margin-top:12px;width:100%;font-size:18px;font-weight:700;padding:12px;border:none;border-radius:12px;background:#E2702A;color:#fff}
+#m{color:#CC3B33;min-height:22px;margin-top:10px;font-weight:600}</style></head>
+<body><div class="c" id="box" style="display:none"><img src="icon-192.png" alt=""><h1>Mathe-Training</h1><p>Bitte Passwort eingeben</p>
+<form id="f"><input id="pw" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"><button>Öffnen</button></form><div id="m"></div></div>
+<script>
+const SALT = 'Y3Jp6Bgj/LADLfjtRg17Vg==', IT = 310000;
+const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0)), b64e = u => btoa(String.fromCharCode(...u));
+async function derive(pw) { const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+  return new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: b64d(SALT), iterations: IT, hash: 'SHA-256' }, base, 256)); }
+async function openApp(raw) {
+  const k = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
+  const b = new Uint8Array(await (await fetch('app.bin', { cache: 'no-cache' })).arrayBuffer());
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b.slice(0, 12) }, k, b.slice(12));
+  try { localStorage.setItem('mt_k', b64e(raw)); } catch (e) {}
+  window.__K = k; document.open(); document.write(new TextDecoder().decode(pt)); document.close();
+}
+if ('serviceWorker' in navigator) { try { navigator.serviceWorker.register('sw.js'); } catch (e) {} }
+(async () => {
+  let saved = null; try { saved = localStorage.getItem('mt_k'); } catch (e) {}
+  if (saved) { try { await openApp(b64d(saved)); return; } catch (e) { try { localStorage.removeItem('mt_k'); } catch (x) {} } }
+  document.getElementById('box').style.display = 'block'; document.getElementById('pw').focus();
+})();
+document.getElementById('f').addEventListener('submit', async ev => {
+  ev.preventDefault(); const m = document.getElementById('m'); m.textContent = 'Prüfe …';
+  try { await openApp(await derive(document.getElementById('pw').value)); }
+  catch (e) { m.textContent = (e && e.name === 'OperationError') ? 'Passwort falsch – bitte nochmal.' : 'Fehler beim Laden – Internet prüfen.'; }
+});
+</script></body></html>
