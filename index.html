@@ -12,7 +12,7 @@ button{margin-top:12px;width:100%;font-size:18px;font-weight:700;padding:12px;bo
 <body><div class="c" id="box" style="display:none"><img src="icon-192.png" alt=""><h1>Mathe-Training</h1><p>Bitte Passwort eingeben</p>
 <form id="f"><input id="pw" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"><button>Öffnen</button></form><div id="m"></div></div>
 <script>
-const SALT = 'Y3Jp6Bgj/LADLfjtRg17Vg==', IT = 310000;
+const SALT = 'lcP7dzqtKQGhQ7TuoEYIEQ==', IT = 310000;
 const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0)), b64e = u => btoa(String.fromCharCode(...u));
 async function derive(pw) { const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
   return new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: b64d(SALT), iterations: IT, hash: 'SHA-256' }, base, 256)); }

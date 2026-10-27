@@ -1,4 +1,4 @@
-const V = 'mt-shell-v1', M = 'mt-media-v1';
+const V = 'mt-shell-v2', M = 'mt-media-v2';
 const SHELL = ['./', 'index.html', 'app.bin', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(V).then(c => c.addAll(SHELL))); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== V && k !== M).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
